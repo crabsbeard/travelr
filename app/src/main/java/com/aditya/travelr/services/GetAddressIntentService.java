@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Handler;
 
 /**
  * Created by devad_000 on 30-06-2015.
@@ -23,11 +24,7 @@ import java.util.Locale;
 public class GetAddressIntentService extends IntentService {
     private static final String TAG = "TravelrError";
     protected ResultReceiver resultReceiver;
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
+
     public GetAddressIntentService(String name) {
         super(name);
     }
@@ -39,6 +36,7 @@ public class GetAddressIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        resultReceiver = intent.getParcelableExtra(Constants.RECEIVER);
         String errorMessage = "";
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         Location location = intent.getParcelableExtra(Constants.LOCATION_DATA_EXTRA);

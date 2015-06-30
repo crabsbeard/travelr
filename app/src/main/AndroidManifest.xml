@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.aditya.travelr" >
+    package="com.aditya.travelr">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -13,10 +13,14 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-        <service android:name=".services.GetAddressIntentService"
-            android:exported="false"
-            />
+        android:theme="@style/AppTheme">
+        <service
+            android:name=".services.GetAddressIntentService"
+            android:exported="false" />
+        <service
+            android:name=".services.GeoFencingService"
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -26,7 +30,7 @@
 
         <activity
             android:name=".HomeActivity"
-            android:label="@string/title_activity_home" >
+            android:label="@string/title_activity_home">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,7 +39,7 @@
         </activity>
         <activity
             android:name=".LocationAddActivity"
-            android:label="@string/title_activity_home" >
+            android:label="@string/title_activity_home">
             <intent-filter>
                 <action android:name="android.intent.action.DEFAULT" />
 
@@ -44,7 +48,7 @@
         </activity>
         <activity
             android:name=".GeofenceActivity"
-            android:label="@string/title_activity_home" >
+            android:label="@string/title_activity_home">
             <intent-filter>
                 <action android:name="android.intent.action.DEFAULT" />
 
@@ -53,7 +57,7 @@
         </activity>
         <activity
             android:name=".HistoryActivity"
-            android:label="@string/title_activity_home" >
+            android:label="@string/title_activity_home">
             <intent-filter>
                 <action android:name="android.intent.action.DEFAULT" />
 

@@ -5,6 +5,5 @@
         android:id="@+id/action_location"
         android:icon="@drawable/_location"
         android:title="My Location"
-        app:showAsAction="ifRoom|collapseActionView"
-        app:actionViewClass="android.support.v7.widget.SearchView"/>
+        app:showAsAction="ifRoom|collapseActionView"/>
 </menu>

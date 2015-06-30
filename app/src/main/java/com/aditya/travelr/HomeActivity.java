@@ -1,13 +1,17 @@
 package com.aditya.travelr;
 
+import android.content.Context;
+import android.support.v7.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +21,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.aditya.travelr.pojo.Constants;
 import com.aditya.travelr.services.GetAddressIntentService;
@@ -31,10 +37,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity implements
-        OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
+        OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener {
 
 
     //global variables
@@ -55,6 +64,10 @@ public class HomeActivity extends AppCompatActivity implements
     static final String SELECTED_ITEM_ID = "selected_item_id";
     static final String FIRST_TIME = "first_time";
     boolean userSawDrawer = false;
+    TextView tv_addressTitle;
+    Map<LatLng, Marker> map = new HashMap<>();
+    FloatingActionButton fab_addLocation;
+
     /*
     * Activity override methods
     * onCreate is the most basic one
@@ -70,10 +83,65 @@ public class HomeActivity extends AppCompatActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        setupNavDrawer(savedInstanceState);
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar!=null){
+            actionBar.setHomeAsUpIndicator(R.drawable.abc_tab_indicator_material);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+        setNav(this);
+        tv_addressTitle = (TextView) findViewById(R.id.tv_addressTitle);
+        fab_addLocation = (FloatingActionButton) findViewById(R.id.fab_add);
+        setClickLister();
         initApiClient();
         googleApiClient.connect();
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+    }
+
+    /*
+    * Navigation Drawer implementation
+    * Menu used to navigate between activities
+    */
+
+    private void setNav(final Context context) {
+        NavigationView navigationView = (NavigationView) findViewById(R.id.navDrawer);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                Intent intent = null;
+                int SelectedId = menuItem.getItemId();
+                if (SelectedId == R.id.history) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    intent = new Intent(context, HistoryActivity.class);
+                    startActivity(intent);
+                }
+                if (SelectedId == R.id.geofence) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                    intent = new Intent(context, GeofenceActivity.class);
+                    startActivity(intent);
+                }
+                return true;
+            }
+
+        });
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        actionBarDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -108,67 +176,13 @@ public class HomeActivity extends AppCompatActivity implements
             case R.id.action_location:
                 getLatestLocation();
                 return true;
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    /*
-    * Navigation Drawer implementation
-    * Menu used to navigate between activities
-    * */
-    @Override
-    public boolean onNavigationItemSelected(MenuItem menuItem) {
-        return false;
-    }
-
-    private void setupNavDrawer(Bundle savedInstanceState) {
-        navDrawer = (NavigationView) findViewById(R.id.navDrawer);
-        navDrawer.setNavigationItemSelectedListener(this);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
-        drawerLayout.setDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
-        if(!drawerWasSeen()){
-            showDrawer();
-            markDrawerSeen();
-        }
-        else{
-            hideDrawer();
-        }
-        selectedId = savedInstanceState == null? R.id.history : savedInstanceState.getInt(SELECTED_ITEM_ID);
-        navigate(selectedId);
-    }
-    private boolean drawerWasSeen(){
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        userSawDrawer = sharedPreferences.getBoolean(FIRST_TIME, false);
-        return userSawDrawer;
-    }
-    private void showDrawer(){
-        drawerLayout.openDrawer(GravityCompat.START);
-    }
-    private void markDrawerSeen(){
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        userSawDrawer = true;
-        sharedPreferences.edit().putBoolean(FIRST_TIME, userSawDrawer).apply();
-    }
-    private void hideDrawer() {
-        drawerLayout.closeDrawer(GravityCompat.START);
-    }
-    private void navigate(int mSelectedId) {
-        Intent intent = null;
-        if (mSelectedId == R.id.history) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-            intent = new Intent(this, HistoryActivity.class);
-            startActivity(intent);
-        }
-        if (mSelectedId == R.id.geofence) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-            intent = new Intent(this, GeofenceActivity.class);
-            startActivity(intent);
-        }
-    }
-
 
     //Google Api Client Methods
     /**
@@ -224,9 +238,12 @@ public class HomeActivity extends AppCompatActivity implements
         this.googleMap = googleMap;
         googleMap.setMyLocationEnabled(false);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 16));
-        googleMap.addMarker(new MarkerOptions()
-                .title("You are here") /*later on get location name and return*/
-                .position(currentPosition));
+        Marker marker = map.get(currentPosition);
+        if(marker==null){
+            googleMap.addMarker(new MarkerOptions()
+                    .title("You are here") /*later on get location name and return*/
+                    .position(currentPosition));
+        }
     }
 
     private void getLatestLocation() {
@@ -234,6 +251,8 @@ public class HomeActivity extends AppCompatActivity implements
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 16);
         googleMap.animateCamera(cameraUpdate);
     }
+
+
 
     /*
     * These are the methods that are used to get location info
@@ -264,6 +283,7 @@ public class HomeActivity extends AppCompatActivity implements
 
     private void startIntentService(Location lastKnowLocation) {
         Intent intent = new Intent(this, GetAddressIntentService.class);
+        addressResultReceiver = new AddressResultReceiver(new Handler());
         intent.putExtra(Constants.RECEIVER, addressResultReceiver);
         intent.putExtra(Constants.LOCATION_DATA_EXTRA, lastKnowLocation);
         startService(intent);
@@ -273,16 +293,28 @@ public class HomeActivity extends AppCompatActivity implements
     //UI change methods
 
     private void updateAppBar(String addressOutput) {
-
+        String[] addressArray = addressOutput.split("\n");
+        this.addressOutput = addressOutput;
+        addressOutput = addressArray[0];
+        tv_addressTitle.setText(addressOutput);
     }
 
     //Activity starter methods
+
+    public void setClickLister(){
+        fab_addLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initStoreActivity();
+            }
+        });
+    }
 
     private void initStoreActivity() {
         Intent intent = new Intent(this, LocationAddActivity.class);
         intent.putExtra(Constants.LOCATION, addressOutput);
         intent.putExtra(Constants.LATITUDE, latitude);
         intent.putExtra(Constants.LONGITUDE, longitude);
-
+        startActivity(intent);
     }
 }
