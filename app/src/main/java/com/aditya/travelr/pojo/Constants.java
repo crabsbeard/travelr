@@ -14,4 +14,19 @@ public final class Constants {
     public static final String LOCATION = PACKAGE_NAME+".LOCATION";
     public static final String LATITUDE = PACKAGE_NAME+".LAT";
     public static final String LONGITUDE = PACKAGE_NAME+".LON";
+
+    public static final String SHARED_PREFERENCES_NAME = PACKAGE_NAME + ".SHARED_PREFERENCES_NAME";
+    public static final String GEOFENCES_ADDED_KEY = PACKAGE_NAME + ".GEOFENCES_ADDED_KEY";
+    public static final long GEOFENCE_EXPIRATION_IN_HOURS = 24;
+    public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
+            GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
+    public float GEOFENCE_RADIUS_IN_METERS = 100;
+
+    public void setGEOFENCE_RADIUS_IN_METERS(float GEOFENCE_RADIUS_IN_METERS) {
+        this.GEOFENCE_RADIUS_IN_METERS = GEOFENCE_RADIUS_IN_METERS;
+    }
+
+    public float getGEOFENCE_RADIUS_IN_METERS() {
+        return GEOFENCE_RADIUS_IN_METERS;
+    }
 }
