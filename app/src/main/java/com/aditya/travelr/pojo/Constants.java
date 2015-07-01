@@ -20,7 +20,7 @@ public final class Constants {
     public static final long GEOFENCE_EXPIRATION_IN_HOURS = 24;
     public static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
             GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
-    public float GEOFENCE_RADIUS_IN_METERS = 100;
+    public static float GEOFENCE_RADIUS_IN_METERS = 100;
 
     public void setGEOFENCE_RADIUS_IN_METERS(float GEOFENCE_RADIUS_IN_METERS) {
         this.GEOFENCE_RADIUS_IN_METERS = GEOFENCE_RADIUS_IN_METERS;

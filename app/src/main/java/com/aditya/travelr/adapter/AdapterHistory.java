@@ -40,6 +40,7 @@ public class AdapterHistory extends RecyclerView.Adapter<HistoryCardViewHolder> 
         HistoryCard historyCard = historyCards.get(position);
         holder.getTv_nickname().setText(historyCard.getNickname());
         holder.getTv_description().setText(historyCard.getDescription());
+        holder.getTv_reverse().setText(historyCard.getReverse());
         holder.getTv_lat().setText("LAT: "+(Double.toString(historyCard.getLat())).substring(0, 6));
         holder.getTv_lon().setText("LON: "+(Double.toString(historyCard.getLon())).substring(0,6));
     }
